@@ -29,6 +29,7 @@ public class RestrictionResult {
 
 	private boolean restricted;
 	private String destination;
+	private String destinationDenided;
 	private RestrictionReason restrictionReason;
 	private boolean http403;
 	
@@ -67,6 +68,14 @@ public class RestrictionResult {
 
 	public boolean isHttp403() {
 		return http403;
+	}
+
+	public String getDestinationDenided() {
+		return destinationDenided;
+	}
+
+	public void setDestinationDenided(String denidedDestination) {
+		this.destinationDenided = denidedDestination;
 	}
 
 }

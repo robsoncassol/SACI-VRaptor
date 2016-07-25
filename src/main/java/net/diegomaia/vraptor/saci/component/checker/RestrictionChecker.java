@@ -56,17 +56,18 @@ public class RestrictionChecker {
 		RestrictionResult restrictionResult = this.restrictor.checkRestriction(method, profile);
 		this.confirmDestination(restrictionResult);
 		if (restrictionResult.isRestricted() && handleRedirection) {
-			this.handleRedirection(restrictionResult.isHttp403(), restrictionResult.getDestination());
+			this.handleRedirection(restrictionResult);
 			restrictionResult = null;
 		}
 		return restrictionResult;
 	}
 
-	private void handleRedirection(boolean forceHttp403, String destination) {
-		if (forceHttp403) {
+	private void handleRedirection(RestrictionResult restrictionResult) {
+		if (restrictionResult.isHttp403()) {
 			this.result.use(Results.http()).sendError(403);
 		} else {
-			this.result.use(Results.page()).redirectTo(destination);
+			this.result.include("destinationDenided",restrictionResult.getDestinationDenided());
+			this.result.use(Results.page()).redirectTo(restrictionResult.getDestination());
 		}
 	}
 

@@ -21,6 +21,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.caelum.vraptor.Get;
+import br.com.caelum.vraptor.Path;
+import br.com.caelum.vraptor.ioc.Component;
 import net.diegomaia.vraptor.saci.annotation.AccessLevel;
 import net.diegomaia.vraptor.saci.annotation.InheritRestrictions;
 import net.diegomaia.vraptor.saci.annotation.LoggedIn;
@@ -34,8 +37,6 @@ import net.diegomaia.vraptor.saci.restriction.RestrictionResult;
 import net.diegomaia.vraptor.saci.restriction.RestrictionsWrapper;
 import net.diegomaia.vraptor.saci.restriction.Role;
 import net.diegomaia.vraptor.saci.restriction.RolesRestriction;
-
-import br.com.caelum.vraptor.ioc.Component;
 
 /**
  * @author Diego Maia da Silva a.k.a. Bronx
@@ -54,9 +55,32 @@ public class Restrictor {
 		RestrictionsWrapper resourceRestrictions = this.getResourceRestriction(method.getDeclaringClass());
 		RestrictionsWrapper methodRestrictions = this.getMethodRestrictions(method);
 		restrictionResult = this.restrictionValidator.validateRestrictions(resourceRestrictions, methodRestrictions, profile);
+		if(resourceRestrictions.hasRestrictions()){
+			restrictionResult.setDestinationDenided(getDenidedDestination(method));
+		}
 		return restrictionResult;
 	}
 	
+	private String getDenidedDestination(Method method) {
+		String destination = "";
+		Class<?> clazz = method.getDeclaringClass();
+		if(clazz.isAnnotationPresent(Path.class)){
+			String[] value = clazz.getAnnotation(Path.class).value();
+			if(value.length>0){
+				destination = value[0];
+			}
+		}
+		
+		if (method.isAnnotationPresent(Get.class)){
+			Get get = method.getAnnotation(Get.class);
+			String[] value = get.value();
+			if(value.length>0){
+				destination += value[0];
+			}
+		}
+		return destination;
+	}
+
 	private RestrictionsWrapper getResourceRestriction(Class<?> clazz) {
 		List<Restriction> restrictions = new ArrayList<Restriction>();
 		if (clazz.isAnnotationPresent(LoggedIn.class)){
